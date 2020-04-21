@@ -9,6 +9,7 @@ use App\Repository\CommentRepository;
 use App\Repository\ConferenceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -46,12 +47,13 @@ class ConferenceController extends AbstractController
      * @param Conference $conference
      * @param CommentRepository $commentRepository
      * @param ConferenceRepository $conferenceRepository
+     * @param string $photoDir
      * @return Response
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
      */
-    public function show(Request $request, Conference $conference, CommentRepository $commentRepository, ConferenceRepository $conferenceRepository)
+    public function show(Request $request, Conference $conference, CommentRepository $commentRepository, ConferenceRepository $conferenceRepository, string $photoDir)
     {
 
         $comment=new Comment();
@@ -59,6 +61,15 @@ class ConferenceController extends AbstractController
         $form->handleRequest($request);
         if($form->isSubmitted()&& $form->isValid()){
             $comment->setConference($conference);
+            if ($photo=$form['photos']->getData()){
+                $filename=bin2hex(random_bytes(6)).'.'.$photo->guessExtension();
+                try {
+                    $photo->move($photoDir, $filename);
+                }catch (FileException $e){
+                    // unable to upload photo given
+                }
+                $comment->setPhotoFilename($filename);
+            }
                 $this->entityManager->persist($comment);
                 $this->entityManager->flush();
                 return $this->redirectToRoute('conference', ['slug'=>$conference->getSlug()]);
