@@ -36,7 +36,7 @@ class ConferenceController extends AbstractController
     }
 
     /**
-     * @Route("/conference/{id}", name="conference")
+     * @Route("/conference/{slug}", name="conference")
      * @param Request $request
      * @param Conference $conference
      * @param CommentRepository $commentRepository
@@ -50,7 +50,6 @@ class ConferenceController extends AbstractController
     {
         $offset= max(0, $request->query->getInt('offset',0));
         $paginator = $commentRepository->getCommentPaginator($conference, $offset);
-            dump($conference);
             return new Response($this->twig->render('conference/show.html.twig', [
                 'conference' => $conference,
                 'comments'=>$paginator,

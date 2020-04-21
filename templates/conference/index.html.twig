@@ -5,7 +5,7 @@
 {% block body %}
 <h2>Give your feedback !</h2>
     {% for conference in conferences %}
-        <h4>{{ conference }}</h4>
-        <p><a href="{{ path('conference', {'id': conference.id}) }}">view</a></p>
+        <h4>{{ conference.city }} {{ conference.year}}</h4>
+        <p><a href="{{ path('conference', {slug: conference.slug}) }}">view</a></p>
     {% endfor %}
 {% endblock %}
