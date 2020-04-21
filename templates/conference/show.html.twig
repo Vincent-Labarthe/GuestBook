@@ -29,6 +29,8 @@
         {% endif %}
     {% else %}
     <div>No Comments have been posted yet for this conference</div>
-    
+
 {% endif %}
+    <h2>Add a new comment</h2>
+    {{ form(comment_form) }}
 {% endblock %}
