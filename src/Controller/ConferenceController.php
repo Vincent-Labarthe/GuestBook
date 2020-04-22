@@ -10,6 +10,7 @@ use App\Repository\ConferenceRepository;
 use App\SpamChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -54,7 +55,8 @@ class ConferenceController extends AbstractController
      * @throws RuntimeError
      * @throws SyntaxError
      */
-    public function show(Request $request, Conference $conference, CommentRepository $commentRepository, ConferenceRepository $conferenceRepository, SpamChecker $spamChecker)
+    public function show(Request $request, Conference $conference, CommentRepository $commentRepository, ConferenceRepository $conferenceRepository, SpamChecker $spamChecker, string $photoDir)
+
     {
 
         $comment=new Comment();
@@ -62,6 +64,15 @@ class ConferenceController extends AbstractController
         $form->handleRequest($request);
         if($form->isSubmitted()&& $form->isValid()){
             $comment->setConference($conference);
+            if ($photo=$form['photos']->getData()){
+                $filename=bin2hex(random_bytes(6)).'.'.$photo->guessExtension();
+                try {
+                    $photo->move($photoDir, $filename);
+                }catch (FileException $e){
+                    // unable to upload photo given
+                }
+                $comment->setPhotoFilename($filename);
+            }
                 $this->entityManager->persist($comment);
                 $context=[
                     'user_ip'=>$request->getClientIp(),
